@@ -1,4 +1,6 @@
 import requests
+from rpm_vercmp import vercmp
+import json
 
 
 def fetch(branch: str):
@@ -8,11 +10,44 @@ def fetch(branch: str):
     return resp.json()["packages"]
 
 
+def compare_versions(v1, r1, v2, r2):
+    #print(dir(rpm))
+    cmp_ver = vercmp(v1, v2)
+    if cmp_ver != 0:
+        return cmp_ver
+    return vercmp(r1, r2)
+
+
 def main():
     sisyphus = fetch("sisyphus")
     p11 = fetch("p11")
     print("packages in sisyphus: " + str(len(sisyphus)))
     print("packages in p11: " + str(len(p11)))
+
+    arch_set = set(pkg["arch"] for pkg in sisyphus + p11)
+    result = {}
+
+    for arch in arch_set:
+        # "pkg name": {pkg attr}
+        s_map = {p["name"]: p for p in sisyphus if p["arch"] == arch}
+        p_map = {p["name"]: p for p in p11 if p["arch"] == arch}
+
+        only_in_sisyphus = sorted(set(s_map) - set(p_map))
+        only_in_p11 = sorted(set(p_map) - set(s_map))
+
+        newer = []
+        for name in set(s_map) & set(p_map):  # both contains same pkg
+            if compare_versions(s_map[name]["version"], s_map[name]["release"],
+                                p_map[name]["version"], p_map[name]["release"]) > 0:
+                newer.append(name)  # but if sisyphus ver is newer - append
+
+        result[arch] = {  # generating json = arch name: {versions}
+            "only_in_sisyphus": only_in_sisyphus,
+            "only_in_p11": only_in_p11,
+            "newer_in_sisyphus": sorted(newer)
+        }
+
+    print(json.dumps(result))
 
 
 if __name__ == "__main__":
