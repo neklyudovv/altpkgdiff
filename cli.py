@@ -26,7 +26,7 @@ def main():
     if args.output:
         with open(args.output, "w") as f:
             f.write(diff)
-            print(f"output written to {args.output}")
+            print(f"output written in {args.output}")
     else:
         print(diff)
 
