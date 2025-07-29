@@ -31,27 +31,35 @@ def compare_versions(v1, r1, v2, r2):
     return vercmp(r1, r2)
 
 
+def beautify_package(package):
+    return {
+        "name": package["name"],
+        "version": package["version"],
+        "release": package["release"]
+    }
+
+
 def diff_branches_json(first_branch, second_branch):
     arch_set = set(pkg["arch"] for pkg in first_branch + second_branch)
     result = {}
 
     for arch in arch_set:
         # "pkg name": {pkg attr}
-        s_map = {p["name"]: p for p in first_branch if p["arch"] == arch}
-        p_map = {p["name"]: p for p in second_branch if p["arch"] == arch}
+        first_map = {p["name"]: beautify_package(p) for p in first_branch if p["arch"] == arch}
+        second_map = {p["name"]: beautify_package(p) for p in second_branch if p["arch"] == arch}
 
-        only_in_first_branch = sorted(set(s_map) - set(p_map))
-        only_in_second_branch = sorted(set(p_map) - set(s_map))
+        only_in_first_branch = [first_map[name] for name in sorted(set(first_map) - set(second_map))]
+        only_in_second_branch = [second_map[name] for name in sorted(set(second_map) - set(first_map))]
 
         newer = []
-        for name in set(s_map) & set(p_map):  # both contains same pkg
-            if compare_versions(s_map[name]["version"], s_map[name]["release"],
-                                p_map[name]["version"], p_map[name]["release"]) > 0:
-                newer.append(name)  # but if first_branch ver is newer - append
+        for name in set(first_map) & set(second_map):  # both contains same pkg
+            if compare_versions(first_map[name]["version"], first_map[name]["release"],
+                                second_map[name]["version"], second_map[name]["release"]) > 0:
+                newer.append(first_map[name])  # but if first_branch ver is newer - append
 
         result[arch] = {  # generating json -> arch name: {b1: [pkgs], b2: [pkgs], newer_in_b1: [pkgs]}
             "only_in_branch1": only_in_first_branch,
             "only_in_branch2": only_in_second_branch,
-            "newer_in_branch1": sorted(newer)
+            "newer_in_branch1": newer
         }
     return json.dumps(result, indent=2)
