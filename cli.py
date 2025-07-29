@@ -1,5 +1,5 @@
 import argparse
-from altpkgdiff import fetch, diff_branches_json
+from altpkgdiff import fetch, diff_branches_json, FetchError
 
 
 def main():
@@ -10,8 +10,13 @@ def main():
 
     args = parser.parse_args()
 
-    first_branch = fetch(args.branch1)
-    second_branch = fetch(args.branch2)
+    try:
+        first_branch = fetch(args.branch1)
+        second_branch = fetch(args.branch2)
+    except FetchError as e:
+        print(e)
+        exit(1)
+
     diff = diff_branches_json(first_branch, second_branch)
 
     if args.output:
