@@ -1,0 +1,7 @@
+certifi==2025.7.14
+charset-normalizer==3.4.2
+idna==3.10
+packaging==25.0
+requests==2.32.4
+rpm-vercmp==0.1.2
+urllib3==2.5.0
