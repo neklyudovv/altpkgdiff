@@ -16,7 +16,7 @@ Version comparison follows RPM versioning rules
 
 ## Table of Contents
 
-- [Requirements](#requirements)
+- [Installation](#installation)
 - [Usage](#usage)
 - [Output format](#output-format)
 - [Example](#example)
@@ -25,13 +25,15 @@ Version comparison follows RPM versioning rules
 
 ---
 
-## Requirements
+## Installation
 
-- `Python 3.8+`
-- `requests`
-- `rpm-vercmp`
+1. Clone the repository:
+```bash
+git clone https://github.com/neklyudovv/altpkgdiff.git
+cd altpkgdiff
+```
 
-Install dependencies:
+2. Install dependencies:
 
 ```bash
 pip install -r requirements.txt
