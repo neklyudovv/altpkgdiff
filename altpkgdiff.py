@@ -1,6 +1,5 @@
 import requests
 from rpm_vercmp import vercmp
-import json
 
 
 class FetchError(Exception):
@@ -39,14 +38,14 @@ def beautify_package(package):
     }
 
 
-def diff_branches_json(first_branch, second_branch):
-    arch_set = set(pkg["arch"] for pkg in first_branch + second_branch)
+def compare_branches(first_branch_pkgs, second_branch_pkgs):
+    arch_set = set(pkg["arch"] for pkg in first_branch_pkgs + second_branch_pkgs)
     result = {}
 
     for arch in arch_set:
         # "pkg name": {pkg attr}
-        first_map = {p["name"]: beautify_package(p) for p in first_branch if p["arch"] == arch}
-        second_map = {p["name"]: beautify_package(p) for p in second_branch if p["arch"] == arch}
+        first_map = {p["name"]: beautify_package(p) for p in first_branch_pkgs if p["arch"] == arch}
+        second_map = {p["name"]: beautify_package(p) for p in second_branch_pkgs if p["arch"] == arch}
 
         only_in_first_branch = [first_map[name] for name in sorted(set(first_map) - set(second_map))]
         only_in_second_branch = [second_map[name] for name in sorted(set(second_map) - set(first_map))]
@@ -57,9 +56,9 @@ def diff_branches_json(first_branch, second_branch):
                                 second_map[name]["version"], second_map[name]["release"]) > 0:
                 newer.append(first_map[name])  # but if first_branch ver is newer - append
 
-        result[arch] = {  # generating json -> arch name: {b1: [pkgs], b2: [pkgs], newer_in_b1: [pkgs]}
+        result[arch] = {  # arch name: {br1: [pkgs], br2: [pkgs], newer_in_b1: [pkgs]}
             "only_in_branch1": only_in_first_branch,
             "only_in_branch2": only_in_second_branch,
             "newer_in_branch1": newer
         }
-    return json.dumps(result, indent=2)
+    return result
