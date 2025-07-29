@@ -161,5 +161,5 @@ Errors during fetching are wrapped in a custom exception `FetchError` for clean 
 ## TODO
 
 * [ ] Add unit tests for version comparison
-* [ ] Add CLI entrypoint
+* [ ] Add CLI entrypoint for `altpkgdiff {args} ...`
 * [ ] Add "--advanced" parameter to get additional package info (for ex. `pkg["epoch"]`)
